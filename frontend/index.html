@@ -3,19 +3,126 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>J.A.R.V.I.S</title>
+<title>J.A.R.V.I.S</title>
 
-    <link
-        rel="stylesheet"
-        href="./style.css"
-    >
+<link rel="stylesheet" href="./style.css">
+
+<style>
+
+/* =========================================
+   BUTTON FIX
+   ========================================= */
+
+.input-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#msg {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+#send {
+    width: 120px;
+    height: 60px;
+    flex-shrink: 0;
+    cursor: pointer;
+    z-index: 999;
+    position: relative;
+}
+
+#mic-btn {
+    width: 80px;
+    height: 60px;
+    flex-shrink: 0;
+
+    border: none;
+    padding: 0;
+
+    background: #00eaff;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    z-index: 999;
+
+    overflow: hidden;
+}
+
+#mic-btn img {
+    width: 55px;
+    height: 55px;
+
+    object-fit: contain;
+
+    display: block;
+
+    pointer-events: none;
+}
+
+#mic-btn:active,
+#send:active {
+    transform: scale(0.94);
+}
+
+#mic-btn.listening {
+    animation: micPulse 1s infinite;
+}
+
+@keyframes micPulse {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+
+/* =========================================
+   MOBILE FIX
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    .input-area {
+        gap: 8px;
+    }
+
+    #send {
+        width: 110px;
+    }
+
+    #mic-btn {
+        width: 75px;
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -23,162 +130,865 @@
 <body>
 
 
-    <!-- =========================================
-         JARVIS HEADER
-         ========================================= -->
+<!-- =========================================
+     HEADER
+     ========================================= -->
 
-    <header>
+<header>
 
-        <h1>J.A.R.V.I.S</h1>
+<h1>J.A.R.V.I.S</h1>
 
-        <p>MOBILE EDITION</p>
+<p>MOBILE EDITION</p>
 
-    </header>
+</header>
 
 
+<!-- =========================================
+     CORE
+     ========================================= -->
 
-    <!-- =========================================
-         CORE
-         ========================================= -->
+<div class="core">
 
-    <div class="core">
+<div class="ring r1"></div>
 
-        <div class="ring r1"></div>
+<div class="ring r2"></div>
 
-        <div class="ring r2"></div>
+<div class="center"></div>
 
-        <div class="center"></div>
+</div>
 
-    </div>
+<p class="core-text">
+CORE ACTIVE
+</p>
 
 
-    <p class="core-text">
-        CORE ACTIVE
-    </p>
+<!-- =========================================
+     STATUS
+     ========================================= -->
 
+<div class="status">
 
+<h2>SYSTEM STATUS</h2>
 
-    <!-- =========================================
-         SYSTEM STATUS
-         ========================================= -->
+<div class="row">
+<span>AI CORE</span>
+<b class="on">● ONLINE</b>
+</div>
 
-    <div class="status">
+<div class="row">
+<span>NETWORK</span>
+<b class="on">● ONLINE</b>
+</div>
 
-        <h2>SYSTEM STATUS</h2>
+<div class="row">
+<span>VOICE</span>
+<b class="on" id="voice-status">
+● READY
+</b>
+</div>
 
+<div class="row">
+<span>MEMORY</span>
+<b class="off">
+○ LOCKED
+</b>
+</div>
 
-        <div class="row">
+</div>
 
-            <span>AI CORE</span>
 
-            <b class="on">
-                ● ONLINE
-            </b>
+<!-- =========================================
+     CHAT
+     ========================================= -->
 
-        </div>
+<div
+    class="chat"
+    id="chat"
+></div>
 
 
-        <div class="row">
+<!-- =========================================
+     INPUT
+     ========================================= -->
 
-            <span>NETWORK</span>
+<div class="input-area">
 
-            <b class="on">
-                ● ONLINE
-            </b>
+<input
+    id="msg"
+    type="text"
+    placeholder="Ask J.A.R.V.I.S..."
+    autocomplete="off"
+>
 
-        </div>
+<button
+    id="send"
+    type="button"
+>
+SEND
+</button>
 
 
-        <div class="row">
+<button
+    id="mic-btn"
+    type="button"
+    aria-label="Microphone"
+>
 
-            <span>VOICE</span>
+<img
+    src="./mic-button.png"
+    alt="Microphone"
+>
 
-            <b class="off">
-                ○ LOCKED
-            </b>
+</button>
 
-        </div>
+</div>
 
 
-        <div class="row">
+<!-- =========================================
+     JAVASCRIPT
+     IMPORTANT:
+     INLINE SCRIPT
+     ========================================= -->
 
-            <span>MEMORY</span>
+<script>
 
-            <b class="off">
-                ○ LOCKED
-            </b>
+"use strict";
 
-        </div>
+console.log("JARVIS INLINE SCRIPT STARTED");
 
-    </div>
 
+/* =========================================
+   ELEMENTS
+   ========================================= */
 
+const chat =
+    document.getElementById("chat");
 
-    <!-- =========================================
-         CHAT
-         ========================================= -->
+const input =
+    document.getElementById("msg");
 
-    <div
-        class="chat"
-        id="chat"
-    ></div>
+const sendBtn =
+    document.getElementById("send");
 
+const micBtn =
+    document.getElementById("mic-btn");
 
+const voiceStatus =
+    document.getElementById("voice-status");
 
-    <!-- =========================================
-         INPUT AREA
-         ========================================= -->
 
-    <div class="input-area">
+console.log("CHAT:", chat);
+console.log("INPUT:", input);
+console.log("SEND:", sendBtn);
+console.log("MIC:", micBtn);
 
 
-        <input
-            id="msg"
-            type="text"
-            placeholder="Ask J.A.R.V.I.S..."
-            autocomplete="off"
-        >
+/* =========================================
+   CHAT
+   ========================================= */
 
+function addMessage(text, type) {
 
-        <!-- SEND -->
+    if (!chat) return;
 
-        <button
-            id="send"
-            type="button"
-        >
-            SEND
-        </button>
+    const div =
+        document.createElement("div");
 
+    div.className =
+        "msg " + type;
 
-        <!-- MICROPHONE -->
+    div.textContent =
+        text;
 
-        <button
-            id="mic-btn"
-            class="mic-button"
-            type="button"
-            aria-label="Start voice recognition"
-        >
+    chat.appendChild(div);
 
-            <img
-                src="./mic-button.png"
-                alt="Microphone"
-            >
+    chat.scrollTop =
+        chat.scrollHeight;
 
-        </button>
+    return div;
+}
 
 
-    </div>
+/* =========================================
+   API KEY
+   ========================================= */
 
+let API_KEY =
+    localStorage.getItem("jarvis_key");
 
 
-    <!-- =========================================
-         JAVASCRIPT
-         ========================================= -->
+if (!API_KEY) {
 
-    <script
-        src="./script.js"
-    ></script>
+    API_KEY =
+        prompt(
+            "Enter your Gemini API Key:"
+        );
 
+    if (API_KEY) {
+
+        API_KEY =
+            API_KEY.trim();
+
+        localStorage.setItem(
+            "jarvis_key",
+            API_KEY
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   GEMINI MODELS
+   ========================================= */
+
+const MODELS = [
+
+    "gemini-3.6-flash",
+
+    "gemini-flash-latest"
+
+];
+
+
+/* =========================================
+   GEMINI
+   ========================================= */
+
+async function callGemini(text) {
+
+    if (!API_KEY) {
+
+        throw new Error(
+            "Gemini API Key missing."
+        );
+
+    }
+
+
+    let lastError = null;
+
+
+    for (const model of MODELS) {
+
+        try {
+
+            const url =
+                "https://generativelanguage.googleapis.com/v1beta/models/"
+                + model
+                + ":generateContent?key="
+                + encodeURIComponent(API_KEY);
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            contents: [
+
+                                {
+                                    role: "user",
+
+                                    parts: [
+
+                                        {
+                                            text:
+                                                "You are J.A.R.V.I.S, a helpful mobile AI assistant. If the user speaks Telugu, reply in Telugu. If English, reply in English. User says: "
+                                                + text
+                                        }
+
+                                    ]
+
+                                }
+
+                            ]
+
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                lastError =
+                    new Error(
+                        data?.error?.message ||
+                        "Gemini API error"
+                    );
+
+                continue;
+
+            }
+
+
+            const reply =
+                data
+                ?.candidates?.[0]
+                ?.content?.parts
+                ?.map(
+                    part =>
+                        part.text || ""
+                )
+                .join("")
+                .trim();
+
+
+            if (reply) {
+
+                return reply;
+
+            }
+
+
+            lastError =
+                new Error(
+                    "Gemini returned empty response."
+                );
+
+        }
+
+        catch (error) {
+
+            lastError =
+                error;
+
+        }
+
+    }
+
+
+    throw (
+        lastError ||
+        new Error(
+            "Gemini request failed."
+        )
+    );
+
+}
+
+
+/* =========================================
+   ASK JARVIS
+   ========================================= */
+
+async function askJarvis(text) {
+
+    const thinking =
+        addMessage(
+            "J.A.R.V.I.S: Thinking...",
+            "ai"
+        );
+
+
+    try {
+
+        const reply =
+            await callGemini(text);
+
+
+        if (thinking) {
+
+            thinking.textContent =
+                "J.A.R.V.I.S: " +
+                reply;
+
+        }
+
+
+        speak(reply);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Gemini Error:",
+            error
+        );
+
+
+        if (thinking) {
+
+            thinking.textContent =
+                "J.A.R.V.I.S: ERROR - " +
+                error.message;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
+   SEND MESSAGE
+   ========================================= */
+
+function sendMessage() {
+
+    console.log("SEND CLICKED");
+
+
+    if (!input) {
+
+        alert(
+            "Input element not found."
+        );
+
+        return;
+
+    }
+
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    addMessage(
+        "YOU: " + text,
+        "user"
+    );
+
+
+    input.value = "";
+
+
+    askJarvis(text);
+
+}
+
+
+/* =========================================
+   SEND BUTTON
+   ========================================= */
+
+if (sendBtn) {
+
+    sendBtn.onclick =
+        function () {
+
+            console.log(
+                "SEND BUTTON WORKING"
+            );
+
+            sendMessage();
+
+        };
+
+}
+
+
+/* =========================================
+   ENTER
+   ========================================= */
+
+if (input) {
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   SPEECH RECOGNITION
+   ========================================= */
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+let recognition = null;
+
+let listening = false;
+
+
+if (SpeechRecognition) {
+
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "te-IN";
+
+
+    recognition.continuous =
+        false;
+
+
+    recognition.interimResults =
+        false;
+
+
+    recognition.maxAlternatives =
+        1;
+
+
+    if (voiceStatus) {
+
+        voiceStatus.textContent =
+            "● READY";
+
+    }
+
+
+    recognition.onstart =
+        function () {
+
+            console.log(
+                "MIC STARTED"
+            );
+
+
+            listening = true;
+
+
+            micBtn.classList.add(
+                "listening"
+            );
+
+
+            if (voiceStatus) {
+
+                voiceStatus.textContent =
+                    "● LISTENING";
+
+            }
+
+        };
+
+
+    recognition.onresult =
+        function (event) {
+
+            const text =
+                event
+                .results[0][0]
+                .transcript
+                .trim();
+
+
+            console.log(
+                "VOICE:",
+                text
+            );
+
+
+            if (!text) return;
+
+
+            addMessage(
+                "YOU: " + text,
+                "user"
+            );
+
+
+            askJarvis(text);
+
+        };
+
+
+    recognition.onerror =
+        function (event) {
+
+            console.error(
+                "MIC ERROR:",
+                event.error
+            );
+
+
+            if (voiceStatus) {
+
+                voiceStatus.textContent =
+                    "● ERROR";
+
+            }
+
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
+
+                addMessage(
+                    "J.A.R.V.I.S: Please allow microphone permission in Chrome.",
+                    "ai"
+                );
+
+            }
+
+        };
+
+
+    recognition.onend =
+        function () {
+
+            listening = false;
+
+
+            micBtn.classList.remove(
+                "listening"
+            );
+
+
+            if (voiceStatus) {
+
+                voiceStatus.textContent =
+                    "● READY";
+
+            }
+
+        };
+
+}
+else {
+
+    console.log(
+        "Speech Recognition unavailable"
+    );
+
+
+    if (voiceStatus) {
+
+        voiceStatus.textContent =
+            "○ UNSUPPORTED";
+
+    }
+
+}
+
+
+/* =========================================
+   MIC BUTTON
+   ========================================= */
+
+if (micBtn) {
+
+    micBtn.onclick =
+        function () {
+
+            console.log(
+                "MIC BUTTON CLICKED"
+            );
+
+
+            if (!recognition) {
+
+                addMessage(
+                    "J.A.R.V.I.S: Voice recognition is not supported in this browser.",
+                    "ai"
+                );
+
+                return;
+
+            }
+
+
+            if (listening) {
+
+                recognition.stop();
+
+                return;
+
+            }
+
+
+            try {
+
+                if (
+                    "speechSynthesis"
+                    in window
+                ) {
+
+                    speechSynthesis.cancel();
+
+                }
+
+
+                recognition.start();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "MIC START ERROR:",
+                    error
+                );
+
+            }
+
+        };
+
+}
+
+
+/* =========================================
+   TEXT TO SPEECH
+   ========================================= */
+
+let voices = [];
+
+
+function loadVoices() {
+
+    if (
+        "speechSynthesis"
+        in window
+    ) {
+
+        voices =
+            speechSynthesis.getVoices();
+
+    }
+
+}
+
+
+loadVoices();
+
+
+if (
+    "speechSynthesis"
+    in window
+) {
+
+    speechSynthesis.onvoiceschanged =
+        loadVoices;
+
+}
+
+
+function speak(text) {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
+        return;
+
+    }
+
+
+    if (!text) return;
+
+
+    speechSynthesis.cancel();
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+    utterance.lang =
+        "te-IN";
+
+
+    utterance.rate =
+        1;
+
+
+    utterance.pitch =
+        0.9;
+
+
+    const teluguVoice =
+        voices.find(
+            voice =>
+                voice.lang &&
+                voice.lang
+                .toLowerCase()
+                .startsWith("te")
+        );
+
+
+    if (teluguVoice) {
+
+        utterance.voice =
+            teluguVoice;
+
+    }
+
+
+    speechSynthesis.speak(
+        utterance
+    );
+
+}
+
+
+/* =========================================
+   FINAL TEST
+   ========================================= */
+
+console.log(
+    "================================"
+);
+
+console.log(
+    "J.A.R.V.I.S READY"
+);
+
+console.log(
+    "SEND BUTTON:",
+    !!sendBtn
+);
+
+console.log(
+    "MIC BUTTON:",
+    !!micBtn
+);
+
+console.log(
+    "VOICE:",
+    !!recognition
+);
+
+console.log(
+    "================================"
+);
+
+</script>
 
 </body>
 
