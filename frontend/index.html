@@ -1,946 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-      maximum-scale=1.0,user-scalable=no">
-
-<title>J.A.R.V.I.S AI</title>
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-:root{
-    --cyan:#00eaff;
-    --blue:#008cff;
-    --dark:#02050a;
-    --panel:rgba(4,15,27,.78);
-    --border:rgba(0,234,255,.25);
-    --text:#e8fbff;
-    --muted:#7c9aaa;
-}
-
-body{
-    min-height:100vh;
-    background:
-        radial-gradient(circle at 50% 20%,
-        rgba(0,150,255,.13),
-        transparent 35%),
-        radial-gradient(circle at 20% 80%,
-        rgba(0,234,255,.06),
-        transparent 30%),
-        #02050a;
-    color:var(--text);
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    overflow-x:hidden;
-}
-
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:
-        linear-gradient(
-            rgba(0,234,255,.025) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(0,234,255,.025) 1px,
-            transparent 1px
-        );
-    background-size:35px 35px;
-    mask-image:linear-gradient(
-        to bottom,
-        black,
-        transparent
-    );
-}
-
-/* HEADER */
-
-.header{
-    height:70px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 18px;
-    border-bottom:1px solid var(--border);
-    background:rgba(1,7,13,.82);
-    backdrop-filter:blur(18px);
-    position:sticky;
-    top:0;
-    z-index:50;
-}
-
-.logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.logo-icon{
-    width:38px;
-    height:38px;
-    border:1px solid var(--cyan);
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--cyan);
-    font-size:18px;
-    box-shadow:
-        0 0 15px rgba(0,234,255,.35),
-        inset 0 0 15px rgba(0,234,255,.08);
-}
-
-.logo-text{
-    font-size:15px;
-    font-weight:700;
-    letter-spacing:3px;
-}
-
-.logo-sub{
-    font-size:8px;
-    color:var(--muted);
-    letter-spacing:2px;
-    margin-top:2px;
-}
-
-.status{
-    display:flex;
-    align-items:center;
-    gap:7px;
-    color:#6fffd4;
-    font-size:10px;
-    letter-spacing:1px;
-}
-
-.status-dot{
-    width:7px;
-    height:7px;
-    border-radius:50%;
-    background:#6fffd4;
-    box-shadow:0 0 10px #6fffd4;
-}
-
-/* MAIN */
-
-.container{
-    width:min(100%,1000px);
-    margin:auto;
-    padding:22px 15px 35px;
-}
-
-/* CORE */
-
-.core-section{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:12px 0 18px;
-}
-
-.core{
-    width:190px;
-    height:190px;
-    border-radius:50%;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.core::before{
-    content:"";
-    position:absolute;
-    inset:8px;
-    border-radius:50%;
-    border:1px solid rgba(0,234,255,.35);
-    box-shadow:
-        0 0 35px rgba(0,180,255,.15),
-        inset 0 0 35px rgba(0,180,255,.08);
-    animation:pulse 3s infinite ease-in-out;
-}
-
-.core::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    border:1px dashed rgba(0,234,255,.35);
-    animation:spin 15s linear infinite;
-}
-
-.core-inner{
-    width:105px;
-    height:105px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:
-        radial-gradient(
-            circle,
-            rgba(0,234,255,.35),
-            rgba(0,75,120,.18) 45%,
-            transparent 70%
-        );
-    border:1px solid rgba(0,234,255,.7);
-    box-shadow:
-        0 0 30px rgba(0,234,255,.4),
-        inset 0 0 25px rgba(0,234,255,.2);
-}
-
-.core-eye{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    background:var(--cyan);
-    box-shadow:
-        0 0 10px var(--cyan),
-        0 0 30px var(--cyan),
-        0 0 60px rgba(0,234,255,.8);
-    animation:coreGlow 1.8s infinite alternate;
-}
-
-.core-title{
-    margin-top:15px;
-    font-size:11px;
-    letter-spacing:4px;
-    color:var(--cyan);
-}
-
-.core-state{
-    margin-top:7px;
-    font-size:9px;
-    letter-spacing:2px;
-    color:var(--muted);
-}
-
-/* PANELS */
-
-.panel{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:17px;
-    box-shadow:
-        0 12px 40px rgba(0,0,0,.28),
-        inset 0 0 25px rgba(0,234,255,.025);
-    backdrop-filter:blur(15px);
-    overflow:hidden;
-    margin-bottom:14px;
-}
-
-.panel-head{
-    height:45px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 15px;
-    border-bottom:1px solid rgba(0,234,255,.12);
-}
-
-.panel-title{
-    font-size:10px;
-    letter-spacing:2px;
-    color:var(--cyan);
-}
-
-.panel-info{
-    font-size:8px;
-    color:var(--muted);
-}
-
-/* CHAT */
-
-.chat{
-    height:310px;
-    overflow-y:auto;
-    padding:14px;
-    scroll-behavior:smooth;
-}
-
-.chat::-webkit-scrollbar{
-    width:3px;
-}
-
-.chat::-webkit-scrollbar-thumb{
-    background:rgba(0,234,255,.3);
-    border-radius:10px;
-}
-
-.message{
-    margin-bottom:13px;
-    max-width:88%;
-    animation:messageIn .25s ease;
-}
-
-.message.user{
-    margin-left:auto;
-}
-
-.message-label{
-    font-size:8px;
-    color:var(--muted);
-    margin-bottom:5px;
-    letter-spacing:1px;
-}
-
-.message-text{
-    padding:10px 12px;
-    border-radius:12px;
-    font-size:13px;
-    line-height:1.5;
-    white-space:pre-wrap;
-}
-
-.message.jarvis .message-text{
-    background:rgba(0,180,255,.06);
-    border:1px solid rgba(0,234,255,.14);
-}
-
-.message.user .message-text{
-    background:rgba(0,234,255,.1);
-    border:1px solid rgba(0,234,255,.2);
-}
-
-/* INPUT */
-
-.input-area{
-    padding:12px;
-    border-top:1px solid rgba(0,234,255,.12);
-}
-
-.input-row{
-    display:flex;
-    gap:8px;
-}
-
-.input{
-    flex:1;
-    min-width:0;
-    height:46px;
-    border-radius:12px;
-    border:1px solid rgba(0,234,255,.2);
-    outline:none;
-    background:rgba(0,0,0,.35);
-    color:white;
-    padding:0 13px;
-    font-size:13px;
-}
-
-.input::placeholder{
-    color:#536b78;
-}
-
-.btn{
-    height:46px;
-    border:1px solid rgba(0,234,255,.28);
-    background:rgba(0,234,255,.07);
-    color:var(--cyan);
-    border-radius:12px;
-    padding:0 15px;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.btn:active{
-    transform:scale(.95);
-}
-
-.btn:hover{
-    background:rgba(0,234,255,.14);
-    box-shadow:0 0 15px rgba(0,234,255,.12);
-}
-
-.mic-btn{
-    width:46px;
-    padding:0;
-    font-size:18px;
-}
-
-.mic-btn.listening{
-    background:rgba(255,60,90,.15);
-    border-color:#ff4566;
-    color:#ff6680;
-    box-shadow:0 0 18px rgba(255,50,80,.25);
-}
-
-/* QUICK ACTIONS */
-
-.quick-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-    padding:12px;
-}
-
-.quick{
-    min-height:62px;
-    border-radius:12px;
-    border:1px solid rgba(0,234,255,.15);
-    background:rgba(0,0,0,.25);
-    color:#bdebf2;
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    transition:.2s;
-}
-
-.quick:active{
-    transform:scale(.96);
-}
-
-.quick:hover{
-    border-color:rgba(0,234,255,.4);
-    background:rgba(0,234,255,.06);
-}
-
-.quick-icon{
-    font-size:19px;
-}
-
-.quick-text{
-    font-size:8px;
-    letter-spacing:1px;
-}
-
-/* MODEL */
-
-.model-area{
-    padding:12px;
-}
-
-.model-select{
-    width:100%;
-    height:43px;
-    border-radius:11px;
-    border:1px solid rgba(0,234,255,.2);
-    background:#06111b;
-    color:#c9f7ff;
-    padding:0 12px;
-    outline:none;
-}
-
-/* MEMORY */
-
-.memory-row{
-    display:flex;
-    gap:8px;
-    padding:12px;
-}
-
-.memory-input{
-    flex:1;
-    height:42px;
-    background:rgba(0,0,0,.3);
-    border:1px solid rgba(0,234,255,.18);
-    border-radius:10px;
-    color:white;
-    padding:0 11px;
-    outline:none;
-}
-
-.memory-list{
-    max-height:140px;
-    overflow-y:auto;
-    padding:0 12px 12px;
-}
-
-.memory-item{
-    padding:9px;
-    margin-top:6px;
-    border-radius:9px;
-    background:rgba(0,234,255,.04);
-    border:1px solid rgba(0,234,255,.08);
-    font-size:11px;
-    color:#a9cbd2;
-}
-
-/* FOOTER */
-
-.footer{
-    text-align:center;
-    color:#405965;
-    font-size:8px;
-    letter-spacing:2px;
-    padding:10px;
-}
-
-/* ANIMATION */
-
-@keyframes spin{
-    from{transform:rotate(0deg)}
-    to{transform:rotate(360deg)}
-}
-
-@keyframes pulse{
-    0%,100%{
-        transform:scale(1);
-        opacity:.7;
-    }
-    50%{
-        transform:scale(1.04);
-        opacity:1;
-    }
-}
-
-@keyframes coreGlow{
-    from{
-        transform:scale(.9);
-        opacity:.75;
-    }
-    to{
-        transform:scale(1.08);
-        opacity:1;
-    }
-}
-
-@keyframes messageIn{
-    from{
-        opacity:0;
-        transform:translateY(5px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-
-/* MOBILE */
-
-@media(max-width:600px){
-
-    .header{
-        height:62px;
-        padding:0 13px;
-    }
-
-    .logo-text{
-        font-size:13px;
-    }
-
-    .core{
-        width:160px;
-        height:160px;
-    }
-
-    .core-inner{
-        width:88px;
-        height:88px;
-    }
-
-    .chat{
-        height:290px;
-    }
-
-    .quick-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .message{
-        max-width:94%;
-    }
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- HEADER -->
-
-<header class="header">
-
-    <div class="logo">
-
-        <div class="logo-icon">
-            ◉
-        </div>
-
-        <div>
-            <div class="logo-text">
-                J.A.R.V.I.S
-            </div>
-
-            <div class="logo-sub">
-                PERSONAL AI ASSISTANT
-            </div>
-        </div>
-
-    </div>
-
-    <div class="status">
-        <span class="status-dot"></span>
-        <span id="systemStatus">
-            ONLINE
-        </span>
-    </div>
-
-</header>
-
-
-<main class="container">
-
-<!-- CORE -->
-
-<section class="core-section">
-
-    <div class="core">
-
-        <div class="core-inner">
-            <div class="core-eye"></div>
-        </div>
-
-    </div>
-
-    <div class="core-title">
-        JARVIS
-    </div>
-
-    <div class="core-state"
-         id="coreState">
-        READY
-    </div>
-
-</section>
-
-
-<!-- CHAT -->
-
-<section class="panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            CONVERSATION
-        </div>
-
-        <div class="panel-info"
-             id="chatCount">
-            0 MESSAGES
-        </div>
-
-    </div>
-
-
-    <div class="chat"
-         id="chat">
-
-        <div class="message jarvis">
-
-            <div class="message-label">
-                JARVIS
-            </div>
-
-            <div class="message-text">
-                హలో వీరా… 👋
-                నేను JARVIS.
-
-                ఏం చేయాలి?
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="input-area">
-
-        <div class="input-row">
-
-            <input
-                id="messageInput"
-                class="input"
-                type="text"
-                placeholder="జార్విస్‌కి ఏదైనా చెప్పండి..."
-                autocomplete="off"
-            >
-
-            <button
-                id="micButton"
-                class="btn mic-btn"
-                onclick="toggleMic()">
-                🎙️
-            </button>
-
-            <button
-                class="btn"
-                onclick="sendMessage()">
-                SEND
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- QUICK ACTIONS -->
-
-<section class="panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            QUICK ACTIONS
-        </div>
-
-    </div>
-
-
-    <div class="quick-grid">
-
-        <button class="quick"
-                onclick="quickCommand('YouTube ఓపెన్ చెయ్')">
-
-            <div class="quick-icon">
-                ▶️
-            </div>
-
-            <div class="quick-text">
-                YOUTUBE
-            </div>
-
-        </button>
-
-
-        <button class="quick"
-                onclick="quickCommand('Instagram ఓపెన్ చెయ్')">
-
-            <div class="quick-icon">
-                📸
-            </div>
-
-            <div class="quick-text">
-                INSTAGRAM
-            </div>
-
-        </button>
-
-
-        <button class="quick"
-                onclick="quickCommand('నా పేరు ఏంటి')">
-
-            <div class="quick-icon">
-                🧠
-            </div>
-
-            <div class="quick-text">
-                MEMORY
-            </div>
-
-        </button>
-
-
-        <button class="quick"
-                onclick="stopJarvisVoice()">
-
-            <div class="quick-icon">
-                🔇
-            </div>
-
-            <div class="quick-text">
-                STOP VOICE
-            </div>
-
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- MODEL -->
-
-<section class="panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            AI MODEL
-        </div>
-
-        <div class="panel-info">
-            GEMINI
-        </div>
-
-    </div>
-
-    <div class="model-area">
-
-        <select
-            id="modelSelect"
-            class="model-select">
-
-            <option>
-                Loading models...
-            </option>
-
-        </select>
-
-    </div>
-
-</section>
-
-
-<!-- MEMORY -->
-
-<section class="panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            JARVIS MEMORY
-        </div>
-
-        <button
-            class="btn"
-            style="height:30px;padding:0 10px;font-size:8px"
-            onclick="clearMemory()">
-
-            CLEAR
-
-        </button>
-
-    </div>
-
-
-    <div class="memory-row">
-
-        <input
-            id="memoryInput"
-            class="memory-input"
-            placeholder="ఉదా: నా పేరు వీరా అని గుర్తుంచుకో"
-        >
-
-        <button
-            class="btn"
-            onclick="saveMemoryFromInput()">
-
-            SAVE
-
-        </button>
-
-    </div>
-
-
-    <div
-        id="memoryList"
-        class="memory-list">
-    </div>
-
-</section>
-
-
-<div class="footer">
-    J.A.R.V.I.S • AI ASSISTANT • ONLINE
-</div>
-
-</main>
-
-
 <script>
 
 /* =========================================================
-   JARVIS CONFIGURATION
+   JARVIS — STABLE CONTROL ENGINE
    ========================================================= */
 
 const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbw4dMC6apEsfbuAC1YtQqmXL2yvYYMYHuV8w8pP3Hber4L4EStbEwex926EGYy0GbM/exec";
 
 
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
-
-const chat =
-    document.getElementById("chat");
-
-const input =
-    document.getElementById("messageInput");
-
-const micButton =
-    document.getElementById("micButton");
-
-const modelSelect =
-    document.getElementById("modelSelect");
-
-const memoryInput =
-    document.getElementById("memoryInput");
-
-const memoryList =
-    document.getElementById("memoryList");
-
-const systemStatus =
-    document.getElementById("systemStatus");
-
-const coreState =
-    document.getElementById("coreState");
-
-const chatCount =
-    document.getElementById("chatCount");
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
 let selectedModel = "";
-
+let recognition = null;
+let isListening = false;
+let jarvisVoices = [];
 let messageCounter = 0;
 
-let recognition = null;
 
-let isListening = false;
+/* =========================================================
+   SAFE ELEMENT HELPER
+   ========================================================= */
 
-let jarvisVoices = [];
+function $(id){
+    return document.getElementById(id);
+}
 
 
 /* =========================================================
    STATUS
    ========================================================= */
 
-function updateStatus(status){
+function updateStatus(text){
 
-    systemStatus.textContent =
-        status;
+    const status = $("systemStatus");
+    const state = $("coreState");
 
-    coreState.textContent =
-        status;
+    if(status){
+        status.textContent = text;
+    }
+
+    if(state){
+        state.textContent = text;
+    }
 }
 
 
 /* =========================================================
-   CHAT MESSAGE
+   CHAT
    ========================================================= */
 
-function addMessage(
-    text,
-    sender = "jarvis",
-    speak = false
-){
+function addMessage(text, sender){
 
     if(!text) return;
+
+    const chat = $("chat");
+
+    if(!chat) return;
 
     const wrapper =
         document.createElement("div");
@@ -957,8 +70,8 @@ function addMessage(
 
     label.textContent =
         sender === "user"
-            ? "YOU"
-            : "JARVIS";
+        ? "YOU"
+        : "JARVIS";
 
 
     const content =
@@ -972,7 +85,6 @@ function addMessage(
 
 
     wrapper.appendChild(label);
-
     wrapper.appendChild(content);
 
     chat.appendChild(wrapper);
@@ -980,136 +92,100 @@ function addMessage(
 
     messageCounter++;
 
-    chatCount.textContent =
-        messageCounter + " MESSAGES";
+
+    const count = $("chatCount");
+
+    if(count){
+        count.textContent =
+            messageCounter + " MESSAGES";
+    }
 
 
     chat.scrollTop =
         chat.scrollHeight;
-
-
-    if(
-        sender === "jarvis" &&
-        speak
-    ){
-        speakNatural(text);
-    }
 }
 
 
 /* =========================================================
-   NATURAL INDIAN VOICE
+   VOICE
    ========================================================= */
 
 function loadVoices(){
 
-    jarvisVoices =
-        speechSynthesis.getVoices();
+    try{
 
-    console.log(
-        "JARVIS voices:",
-        jarvisVoices.map(v => ({
-            name:v.name,
-            lang:v.lang
-        }))
-    );
+        jarvisVoices =
+            window.speechSynthesis
+            ? speechSynthesis.getVoices()
+            : [];
+
+    }catch(error){
+
+        console.log(
+            "Voice loading error",
+            error
+        );
+
+    }
 }
 
-speechSynthesis.onvoiceschanged =
-    loadVoices;
 
-loadVoices();
+if("speechSynthesis" in window){
+
+    speechSynthesis.onvoiceschanged =
+        loadVoices;
+
+    loadVoices();
+}
 
 
-function getBestJarvisVoice(){
+/* =========================================================
+   SELECT VOICE
+   ========================================================= */
+
+function getBestVoice(){
 
     const voices =
         jarvisVoices.length
         ? jarvisVoices
-        : speechSynthesis.getVoices();
-
-
-    /*
-       1. Telugu voice
-    */
-
-    let voice =
-        voices.find(v =>
-            /^te-IN$/i.test(v.lang) &&
-            /female|woman|girl/i.test(v.name)
+        : (
+            "speechSynthesis" in window
+            ? speechSynthesis.getVoices()
+            : []
         );
 
 
-    /*
-       2. Any Telugu voice
-    */
+    let voice =
+        voices.find(v =>
+            v.lang &&
+            v.lang.toLowerCase() === "te-in"
+        );
+
 
     if(!voice){
 
         voice =
             voices.find(v =>
-                /^te-IN$/i.test(v.lang)
+                v.lang &&
+                v.lang.toLowerCase() === "en-in"
             );
 
     }
 
-
-    /*
-       3. Indian English female
-    */
 
     if(!voice){
 
         voice =
             voices.find(v =>
-                /^en-IN$/i.test(v.lang) &&
-                /female|woman|girl|heera|priya|neerja/i.test(v.name)
+                v.lang &&
+                v.lang.toLowerCase()
+                .startsWith("en")
             );
 
     }
 
 
-    /*
-       4. Indian English
-    */
-
-    if(!voice){
-
-        voice =
-            voices.find(v =>
-                /^en-IN$/i.test(v.lang)
-            );
-
-    }
-
-
-    /*
-       5. English fallback
-    */
-
-    if(!voice){
-
-        voice =
-            voices.find(v =>
-                /^en-US$/i.test(v.lang)
-            );
-
-    }
-
-
-    /*
-       6. Final fallback
-    */
-
-    if(!voice){
-
-        voice =
-            voices[0];
-
-    }
-
-
-    return voice;
+    return voice || voices[0] || null;
 }
 
 
@@ -1120,85 +196,38 @@ function getBestJarvisVoice(){
 function speakNatural(text){
 
     if(
+        !text ||
         !("speechSynthesis" in window)
     ){
+
         return;
+
     }
 
 
-    if(!text){
-        return;
-    }
+    try{
+
+        speechSynthesis.cancel();
 
 
-    speechSynthesis.cancel();
+        let cleanText =
+            String(text)
+            .replace(/[*#_~`]/g,"")
+            .replace(/\s+/g," ")
+            .trim();
 
 
-    /*
-       Remove markdown
-    */
-
-    text =
-        String(text)
-        .replace(/```[\s\S]*?```/g,"")
-        .replace(/[*#_~]/g,"")
-        .replace(/\[.*?\]\(.*?\)/g,"")
-        .replace(/\s+/g," ")
-        .trim();
+        if(!cleanText) return;
 
 
-    if(!text){
-        return;
-    }
-
-
-    /*
-       Natural conversational pauses
-    */
-
-    text =
-        text
-        .replace(/సరే\./g,"సరే…")
-        .replace(/ఓకే\./g,"ఓకే…")
-        .replace(/అవును\./g,"అవును…")
-        .replace(/చేస్తున్నాను\./g,"చేస్తున్నాను…");
-
-
-    /*
-       Sentence split
-    */
-
-    const sentences =
-        text
-        .split(/(?<=[.!?।])\s+/)
-        .filter(Boolean);
-
-
-    let index = 0;
-
-
-    function speakNext(){
-
-        if(index >= sentences.length){
-
-            updateStatus("READY");
-
-            return;
-        }
-
-
-        const sentence =
-            sentences[index++].trim();
+        const voice =
+            getBestVoice();
 
 
         const utterance =
             new SpeechSynthesisUtterance(
-                sentence
+                cleanText
             );
-
-
-        const voice =
-            getBestJarvisVoice();
 
 
         if(voice){
@@ -1217,21 +246,1038 @@ function speakNatural(text){
         }
 
 
-        /*
-           Natural Indian conversational sound
-        */
-
         utterance.rate =
             0.93;
 
         utterance.pitch =
-            1.06;
+            1.05;
 
         utterance.volume =
             1;
 
 
-        utterance.onstart = () => {
+        utterance.onstart =
+            function(){
+
+                updateStatus(
+                    "SPEAKING"
+                );
+
+            };
+
+
+        utterance.onend =
+            function(){
+
+                updateStatus(
+                    "READY"
+                );
+
+            };
+
+
+        utterance.onerror =
+            function(){
+
+                updateStatus(
+                    "READY"
+                );
+
+            };
+
+
+        speechSynthesis.speak(
+            utterance
+        );
+
+    }catch(error){
+
+        console.log(
+            "Speech error:",
+            error
+        );
+
+        updateStatus(
+            "READY"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   STOP VOICE
+   ========================================================= */
+
+function stopJarvisVoice(){
+
+    try{
+
+        if(
+            "speechSynthesis" in window
+        ){
+
+            speechSynthesis.cancel();
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+    updateStatus("READY");
+}
+
+
+/* =========================================================
+   MEMORY
+   ========================================================= */
+
+function getMemory(){
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem(
+                "jarvis_memory"
+            ) || "[]"
+        );
+
+    }catch(error){
+
+        return [];
+
+    }
+}
+
+
+function saveMemory(text){
+
+    if(!text) return;
+
+
+    const memories =
+        getMemory();
+
+
+    memories.push({
+
+        text:text,
+
+        time:
+            new Date().toLocaleString()
+
+    });
+
+
+    localStorage.setItem(
+        "jarvis_memory",
+        JSON.stringify(memories)
+    );
+
+
+    renderMemory();
+}
+
+
+function renderMemory(){
+
+    const list =
+        $("memoryList");
+
+    if(!list) return;
+
+
+    const memories =
+        getMemory();
+
+
+    list.innerHTML = "";
+
+
+    if(!memories.length){
+
+        list.innerHTML =
+            `<div class="memory-item">
+                Memory empty.
+             </div>`;
+
+        return;
+
+    }
+
+
+    memories
+    .slice()
+    .reverse()
+    .forEach(function(memory){
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+        item.className =
+            "memory-item";
+
+        item.textContent =
+            "🧠 " + memory.text;
+
+        list.appendChild(item);
+
+    });
+}
+
+
+function clearMemory(){
+
+    localStorage.removeItem(
+        "jarvis_memory"
+    );
+
+    renderMemory();
+
+
+    const message =
+        "సరే… నా memory క్లియర్ చేశాను.";
+
+    addMessage(
+        message,
+        "jarvis"
+    );
+
+    speakNatural(message);
+}
+
+
+/* =========================================================
+   MEMORY COMMAND
+   ========================================================= */
+
+function handleMemoryCommand(text){
+
+    const lower =
+        text.toLowerCase();
+
+
+    if(
+        lower.includes("గుర్తుంచుకో") ||
+        lower.includes("remember")
+    ){
+
+        saveMemory(text);
+
+        return "సరే వీరా… ఇది గుర్తుంచుకున్నాను.";
+
+    }
+
+
+    if(
+        lower.includes("నా పేరు ఏంటి") ||
+        lower.includes("నా పేరు ఏమిటి") ||
+        lower.includes("what is my name")
+    ){
+
+        const memories =
+            getMemory();
+
+
+        const found =
+            memories.find(function(item){
+
+                return item.text.includes(
+                    "నా పేరు"
+                );
+
+            });
+
+
+        if(found){
+
+            return found.text;
+
+        }
+
+
+        return "ఇంకా నీ పేరు నా memoryలో లేదు.";
+
+    }
+
+
+    if(
+        lower.includes("మెమరీ క్లియర్") ||
+        lower.includes("memory clear") ||
+        lower.includes("clear memory")
+    ){
+
+        localStorage.removeItem(
+            "jarvis_memory"
+        );
+
+        renderMemory();
+
+        return "సరే… memory క్లియర్ చేశాను.";
+
+    }
+
+
+    return null;
+}
+
+
+/* =========================================================
+   LOCAL COMMANDS
+   ========================================================= */
+
+function handleLocalCommand(text){
+
+    const lower =
+        text.toLowerCase();
+
+
+    if(
+        lower.includes("youtube") &&
+        (
+            lower.includes("open") ||
+            lower.includes("ఓపెన్") ||
+            lower.includes("తెరువు")
+        )
+    ){
+
+        window.open(
+            "https://www.youtube.com/",
+            "_blank"
+        );
+
+        return "సరే వీరా… YouTube ఓపెన్ చేస్తున్నాను.";
+
+    }
+
+
+    if(
+        lower.includes("instagram") &&
+        (
+            lower.includes("open") ||
+            lower.includes("ఓపెన్") ||
+            lower.includes("తెరువు")
+        )
+    ){
+
+        window.open(
+            "https://www.instagram.com/",
+            "_blank"
+        );
+
+        return "సరే వీరా… Instagram ఓపెన్ చేస్తున్నాను.";
+
+    }
+
+
+    return null;
+}
+
+
+/* =========================================================
+   SEND
+   ========================================================= */
+
+async function sendMessage(){
+
+    const input =
+        $("messageInput");
+
+    if(!input) return;
+
+
+    const text =
+        input.value.trim();
+
+
+    if(!text){
+
+        input.focus();
+
+        return;
+
+    }
+
+
+    input.value = "";
+
+
+    addMessage(
+        text,
+        "user"
+    );
+
+
+    /* MEMORY */
+
+    const memoryReply =
+        handleMemoryCommand(
+            text
+        );
+
+
+    if(memoryReply){
+
+        addMessage(
+            memoryReply,
+            "jarvis"
+        );
+
+        speakNatural(
+            memoryReply
+        );
+
+        return;
+    }
+
+
+    /* LOCAL COMMAND */
+
+    const localReply =
+        handleLocalCommand(
+            text
+        );
+
+
+    if(localReply){
+
+        addMessage(
+            localReply,
+            "jarvis"
+        );
+
+        speakNatural(
+            localReply
+        );
+
+        return;
+    }
+
+
+    /* GEMINI */
+
+    await askGemini(text);
+}
+
+
+/* =========================================================
+   GEMINI
+   ========================================================= */
+
+async function askGemini(text){
+
+    updateStatus(
+        "THINKING"
+    );
+
+
+    try{
+
+        const memories =
+            getMemory();
+
+
+        const memoryText =
+            memories
+            .map(function(item){
+                return item.text;
+            })
+            .join("\n");
+
+
+        const systemPrompt = `
+You are JARVIS, a friendly Indian female AI assistant.
+
+Speak naturally like a real Indian girl talking to a friend.
+
+Use simple Telugu mixed with English.
+
+Be warm, short and conversational.
+
+Do not sound robotic.
+
+Use natural phrases such as:
+
+"సరే వీరా…"
+"ఓకే…"
+"అవును."
+"చేస్తున్నాను."
+"అయిపోయింది."
+
+Do not repeat the user's complete question.
+
+Keep simple answers short.
+
+User memory:
+${memoryText || "No saved memory."}
+`;
+
+
+        const response =
+            await fetch(
+                APPS_SCRIPT_URL,
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                        "text/plain;charset=utf-8"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            model:
+                                selectedModel,
+
+                            system:
+                                systemPrompt,
+
+                            message:
+                                text
+
+                        })
+                }
+            );
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if(!data.success){
+
+            throw new Error(
+                data.error ||
+                "Gemini failed"
+            );
+
+        }
+
+
+        const reply =
+            data.reply ||
+            "క్షమించండి… response రాలేదు.";
+
+
+        updateStatus(
+            "READY"
+        );
+
+
+        addMessage(
+            reply,
+            "jarvis"
+        );
+
+
+        speakNatural(
+            reply
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "GEMINI ERROR:",
+            error
+        );
+
+
+        const errorMessage =
+            "వీరా… AI connectionలో సమస్య వచ్చింది.";
+
+
+        updateStatus(
+            "ERROR"
+        );
+
+
+        addMessage(
+            errorMessage,
+            "jarvis"
+        );
+
+
+        speakNatural(
+            errorMessage
+        );
+
+
+        setTimeout(
+            function(){
+                updateStatus("READY");
+            },
+            2000
+        );
+
+    }
+}
+
+
+/* =========================================================
+   LOAD MODELS
+   ========================================================= */
+
+async function loadModels(){
+
+    const select =
+        $("modelSelect");
+
+    if(!select) return;
+
+
+    try{
+
+        select.innerHTML =
+            `<option>
+                Loading...
+             </option>`;
+
+
+        const response =
+            await fetch(
+                APPS_SCRIPT_URL
+            );
+
+
+        const data =
+            await response.json();
+
+
+        select.innerHTML = "";
+
+
+        if(
+            data.models &&
+            data.models.length
+        ){
+
+            data.models.forEach(
+                function(model){
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        model;
+
+                    option.textContent =
+                        model;
+
+                    select.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+
+            selectedModel =
+                data.defaultModel ||
+                data.models[0];
+
+
+            select.value =
+                selectedModel;
+
+        }else{
+
+            select.innerHTML =
+                `<option value="">
+                    Server Default
+                 </option>`;
+
+        }
+
+
+    }catch(error){
+
+        console.error(
+            "MODEL ERROR:",
+            error
+        );
+
+
+        select.innerHTML =
+            `<option value="">
+                Server Default
+             </option>`;
+
+    }
+
+
+    select.onchange =
+        function(){
+
+            selectedModel =
+                select.value;
+
+        };
+}
+
+
+/* =========================================================
+   MICROPHONE
+   ========================================================= */
+
+function setupMicrophone(){
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    if(!SpeechRecognition){
+
+        console.log(
+            "Speech recognition unavailable"
+        );
+
+        return;
+
+    }
+
+
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "te-IN";
+
+    recognition.continuous =
+        false;
+
+    recognition.interimResults =
+        false;
+
+    recognition.maxAlternatives =
+        1;
+
+
+    recognition.onstart =
+        function(){
+
+            isListening =
+                true;
+
+
+            const button =
+                $("micButton");
+
+
+            if(button){
+
+                button.classList.add(
+                    "listening"
+                );
+
+                button.textContent =
+                    "🔴";
+
+            }
+
 
             updateStatus(
-                "
+                "LISTENING"
+            );
+
+        };
+
+
+    recognition.onresult =
+        function(event){
+
+            const result =
+                event.results[0][0]
+                .transcript;
+
+
+            const input =
+                $("messageInput");
+
+
+            if(input){
+
+                input.value =
+                    result;
+
+            }
+
+
+            stopListeningUI();
+
+
+            setTimeout(
+                sendMessage,
+                200
+            );
+
+        };
+
+
+    recognition.onerror =
+        function(event){
+
+            console.log(
+                "MIC ERROR:",
+                event.error
+            );
+
+
+            stopListeningUI();
+
+        };
+
+
+    recognition.onend =
+        function(){
+
+            stopListeningUI();
+
+        };
+}
+
+
+function stopListeningUI(){
+
+    isListening =
+        false;
+
+
+    const button =
+        $("micButton");
+
+
+    if(button){
+
+        button.classList.remove(
+            "listening"
+        );
+
+        button.textContent =
+            "🎙️";
+
+    }
+
+
+    updateStatus(
+        "READY"
+    );
+}
+
+
+function toggleMic(){
+
+    if(!recognition){
+
+        setupMicrophone();
+
+    }
+
+
+    if(!recognition){
+
+        const msg =
+            "ఈ browserలో microphone voice recognition support లేదు.";
+
+        addMessage(
+            msg,
+            "jarvis"
+        );
+
+        speakNatural(msg);
+
+        return;
+
+    }
+
+
+    if(isListening){
+
+        try{
+
+            recognition.stop();
+
+        }catch(error){
+
+            console.log(error);
+
+        }
+
+        return;
+
+    }
+
+
+    stopJarvisVoice();
+
+
+    try{
+
+        recognition.start();
+
+    }catch(error){
+
+        console.log(
+            "START MIC ERROR:",
+            error
+        );
+
+    }
+}
+
+
+/* =========================================================
+   QUICK COMMANDS
+   ========================================================= */
+
+function quickCommand(command){
+
+    const input =
+        $("messageInput");
+
+
+    if(!input) return;
+
+
+    input.value =
+        command;
+
+
+    sendMessage();
+}
+
+
+/* =========================================================
+   BUTTON EVENT SYSTEM
+   ========================================================= */
+
+function connectButtons(){
+
+    console.log(
+        "JARVIS: Connecting buttons..."
+    );
+
+
+    const sendButton =
+        document.querySelector(
+            ".input-row .btn:not(.mic-btn)"
+        );
+
+
+    if(sendButton){
+
+        sendButton.addEventListener(
+            "click",
+            function(event){
+
+                event.preventDefault();
+
+                console.log(
+                    "SEND CLICK"
+                );
+
+                sendMessage();
+
+            }
+        );
+
+    }
+
+
+    const micButton =
+        $("micButton");
+
+
+    if(micButton){
+
+        micButton.addEventListener(
+            "click",
+            function(event){
+
+                event.preventDefault();
+
+                console.log(
+                    "MIC CLICK"
+                );
+
+                toggleMic();
+
+            }
+        );
+
+    }
+
+
+    /* QUICK BUTTONS */
+
+    const quickButtons =
+        document.querySelectorAll(
+            ".quick"
+        );
+
+
+    quickButtons.forEach(
+        function(button){
+
+            button.addEventListener(
+                "click",
+                function(){
+
+                    const text =
+                        button.innerText
+                        .toLowerCase();
+
+
+                    if(
+                        text.includes(
+                            "youtube"
+                        )
+                    ){
+
+                        quickCommand(
+                            "YouTube ఓపెన్ చెయ్"
+                        );
+
+                    }
+
+                    else if(
+                        text.includes(
+                            "instagram"
+                        )
+                    ){
+
+                        quickCommand(
+                            "Instagram ఓపెన్ చెయ్"
+                        );
+
+                    }
+
+                    else if(
+                        text.includes(
+                            "memory"
+                        )
+                    ){
+
+                        quickCommand(
+                            "నా పేరు ఏంటి"
+                      
