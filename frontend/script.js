@@ -1,31 +1,55 @@
 "use strict";
 
-// ==========================================
-// J.A.R.V.I.S. MOBILE EDITION v2.0
-// ==========================================
+// ============================================
+// J.A.R.V.I.S. MOBILE EDITION v3.0
+// Telugu Voice + AI Chat
+// ============================================
 
 const BACKEND_URL =
   "https://script.google.com/macros/s/AKfycbz-pIVQwKxbFDtOFnUUXVwWcxUU8Iylt6Nni3k6yvqT5TwsrwHoOH8P3xXKC4M-Hu0j/exec";
 
-// Wait until HTML is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
 
   const chat = document.getElementById("chat");
   const input = document.getElementById("msg");
   const sendButton = document.getElementById("send");
 
-  // Check required HTML elements
   if (!chat || !input || !sendButton) {
-    console.error("JARVIS: Required HTML elements not found.");
+    console.error("JARVIS: HTML elements missing.");
     return;
   }
 
-  // Add message to chat
+  // ============================================
+  // CREATE MICROPHONE BUTTON
+  // ============================================
+
+  let micButton = document.getElementById("mic");
+
+  if (!micButton) {
+    micButton = document.createElement("button");
+    micButton.id = "mic";
+    micButton.type = "button";
+    micButton.textContent = "🎙️";
+    micButton.title = "Telugu Voice";
+
+    sendButton.parentNode.insertBefore(
+      micButton,
+      sendButton
+    );
+  }
+
+  // ============================================
+  // ADD MESSAGE TO CHAT
+  // ============================================
+
   function addMessage(text, sender) {
+
     const message = document.createElement("div");
 
     message.className =
-      sender === "user" ? "user-message" : "jarvis-message";
+      sender === "user"
+        ? "user-message"
+        : "jarvis-message";
 
     message.textContent = text;
 
@@ -33,31 +57,40 @@ document.addEventListener("DOMContentLoaded", () => {
     chat.scrollTop = chat.scrollHeight;
   }
 
-  // Show temporary loading message
+  // ============================================
+  // LOADING MESSAGE
+  // ============================================
+
   function showLoading() {
+
     const loading = document.createElement("div");
 
-    loading.className = "jarvis-message";
     loading.id = "jarvis-loading";
+    loading.className = "jarvis-message";
     loading.textContent = "J.A.R.V.I.S.: Thinking...";
 
     chat.appendChild(loading);
     chat.scrollTop = chat.scrollHeight;
   }
 
-  // Remove loading message
   function removeLoading() {
-    const loading = document.getElementById("jarvis-loading");
+
+    const loading =
+      document.getElementById("jarvis-loading");
 
     if (loading) {
       loading.remove();
     }
   }
 
-  // Send message to Google Apps Script backend
+  // ============================================
+  // CALL GOOGLE APPS SCRIPT BACKEND
+  // ============================================
+
   async function askJarvis(message) {
 
     const response = await fetch(BACKEND_URL, {
+
       method: "POST",
 
       headers: {
@@ -67,10 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({
         message: message
       })
+
     });
 
     if (!response.ok) {
-      throw new Error("Network error: " + response.status);
+      throw new Error(
+        "Network error: " + response.status
+      );
     }
 
     const responseText = await response.text();
@@ -80,30 +116,38 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       data = JSON.parse(responseText);
     } catch (error) {
-      throw new Error("Invalid response from backend.");
+      throw new Error(
+        "Backend returned an invalid response."
+      );
     }
 
     if (!data.success) {
-      throw new Error(data.error || "Unknown backend error.");
+      throw new Error(
+        data.error || "Gemini backend error."
+      );
     }
 
-    return data.reply || "J.A.R.V.I.S.: No reply received.";
+    return data.reply || "Reply not received.";
+
   }
 
-  // Main send function
+  // ============================================
+  // SEND MESSAGE
+  // ============================================
+
   async function sendMessage() {
 
     const message = input.value.trim();
 
-    if (!message) {
+    if (!message || sendButton.disabled) {
       return;
     }
 
-    // Prevent multiple clicks
     sendButton.disabled = true;
     input.disabled = true;
 
     addMessage("YOU: " + message, "user");
+
     input.value = "";
 
     showLoading();
@@ -113,7 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const reply = await askJarvis(message);
 
       removeLoading();
-      addMessage("J.A.R.V.I.S.: " + reply, "jarvis");
+
+      addMessage(
+        "J.A.R.V.I.S.: " + reply,
+        "jarvis"
+      );
 
     } catch (error) {
 
@@ -124,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "jarvis"
       );
 
-      console.error("JARVIS Error:", error);
+      console.error("JARVIS ERROR:", error);
 
     } finally {
 
@@ -133,21 +181,110 @@ document.addEventListener("DOMContentLoaded", () => {
       input.focus();
 
     }
+
   }
 
-  // SEND button click
-  sendButton.addEventListener("click", sendMessage);
+  // ============================================
+  // SEND BUTTON
+  // ============================================
 
-  // Send message using Enter key
+  sendButton.addEventListener(
+    "click",
+    sendMessage
+  );
+
+  // ============================================
+  // ENTER KEY
+  // ============================================
+
   input.addEventListener("keydown", (event) => {
 
     if (event.key === "Enter") {
+
       event.preventDefault();
       sendMessage();
+
     }
 
   });
 
-  console.log("J.A.R.V.I.S. v2.0 is ready.");
+  // ============================================
+  // TELUGU VOICE RECOGNITION
+  // ============================================
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+
+    micButton.disabled = true;
+    micButton.textContent = "❌";
+
+    console.warn(
+      "Voice recognition is not supported."
+    );
+
+  } else {
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "te-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    micButton.addEventListener("click", () => {
+
+      try {
+
+        recognition.start();
+
+        micButton.textContent = "🔴";
+        micButton.disabled = true;
+
+      } catch (error) {
+
+        console.log(
+          "Voice recognition is already running."
+        );
+
+      }
+
+    });
+
+    recognition.onresult = (event) => {
+
+      const spokenText =
+        event.results[0][0].transcript;
+
+      input.value = spokenText;
+
+    };
+
+    recognition.onend = () => {
+
+      micButton.textContent = "🎙️";
+      micButton.disabled = false;
+
+    };
+
+    recognition.onerror = (event) => {
+
+      console.error(
+        "Voice recognition error:",
+        event.error
+      );
+
+      micButton.textContent = "🎙️";
+      micButton.disabled = false;
+
+    };
+
+  }
+
+  console.log(
+    "J.A.R.V.I.S. v3.0 is ready."
+  );
 
 });
+      
