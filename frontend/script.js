@@ -1,125 +1,94 @@
-/* =========================================================
-   J.A.R.V.I.S AI ASSISTANT
-   Gemini AI + Telugu Voice Recognition + TTS
-   Mobile Edition
-   ========================================================= */
+// =====================================================
+// J.A.R.V.I.S MOBILE EDITION
+// =====================================================
+
+"use strict";
 
 
-/* =========================================================
-   1. GEMINI API KEY
-   ========================================================= */
+// =====================================================
+// DOM
+// =====================================================
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("msg");
+const sendBtn = document.getElementById("send");
+const micBtn = document.getElementById("mic-btn");
+
+
+// =====================================================
+// CHECK UI
+// =====================================================
+
+console.log("JARVIS SCRIPT LOADED");
+
+console.log("Chat:", chat);
+console.log("Input:", input);
+console.log("Send:", sendBtn);
+console.log("Mic:", micBtn);
+
+
+// =====================================================
+// API KEY
+// =====================================================
 
 let API_KEY = localStorage.getItem("jarvis_key");
 
-if (API_KEY) {
-    API_KEY = API_KEY.trim();
-}
-
 if (!API_KEY) {
 
-    API_KEY = prompt(
-        "Enter your Gemini API Key:"
-    );
+    API_KEY = prompt("Enter your Gemini API Key:");
 
     if (API_KEY) {
-
         API_KEY = API_KEY.trim();
-
-        localStorage.setItem(
-            "jarvis_key",
-            API_KEY
-        );
+        localStorage.setItem("jarvis_key", API_KEY);
     }
 }
 
 
-/* =========================================================
-   2. GEMINI MODELS
-   ========================================================= */
+// =====================================================
+// GEMINI MODELS
+// =====================================================
 
 const MODELS = [
-
-    // Primary
-    "gemini-3.8-flash",
-
-    // Backup
     "gemini-3.6-flash",
-
-    // Final fallback
     "gemini-flash-latest"
-
 ];
 
 
-/* =========================================================
-   3. JARVIS SETTINGS
-   ========================================================= */
+// =====================================================
+// JARVIS SYSTEM PROMPT
+// =====================================================
 
-const JARVIS_SYSTEM_PROMPT = `
-You are J.A.R.V.I.S, a helpful personal AI assistant.
+const SYSTEM_PROMPT = `
+You are J.A.R.V.I.S.
 
-Your personality:
-- Calm
-- Intelligent
-- Professional
-- Friendly
-- Concise
-- Helpful
+You are a helpful mobile AI assistant.
 
-Language behavior:
-- If the user speaks Telugu, reply in Telugu.
-- If the user speaks English, reply in English.
-- If the user mixes Telugu and English, understand the meaning and reply naturally.
-- Do not unnecessarily repeat the user's question.
+Rules:
 
-You are running inside a mobile web application.
-
-Important:
-- Never claim that you performed an Android action unless the application actually performed it.
-- If a requested mobile action is not currently connected to the application, clearly say that the action is not connected yet.
+1. If the user speaks Telugu, reply in Telugu.
+2. If the user speaks English, reply in English.
+3. If the user mixes Telugu and English, understand naturally.
+4. Keep replies clear and useful.
+5. Do not claim that you controlled the phone unless an actual phone-control feature performed the action.
 `;
 
 
-/* =========================================================
-   4. DOM ELEMENTS
-   ========================================================= */
+// =====================================================
+// CHAT FUNCTION
+// =====================================================
 
-const chat = document.getElementById("chat");
-
-const input = document.getElementById("msg");
-
-const micBtn = document.getElementById("mic-btn");
-
-const sendBtn = document.getElementById("send");
-
-
-/* =========================================================
-   5. STATE
-   ========================================================= */
-
-let isListening = false;
-
-let isThinking = false;
-
-let conversationHistory = [];
-
-
-/* =========================================================
-   6. CHAT DISPLAY
-   ========================================================= */
-
-function add(text, who) {
+function addMessage(text, type) {
 
     if (!chat) {
-        console.warn("Chat element not found.");
+        console.error("Chat element not found");
         return null;
     }
 
     const div = document.createElement("div");
 
-    div.className = "msg " + who;
+    div.className = "msg " + type;
 
-    div.innerText = text;
+    div.textContent = text;
 
     chat.appendChild(div);
 
@@ -129,48 +98,40 @@ function add(text, who) {
 }
 
 
-/* =========================================================
-   7. GEMINI API
-   ========================================================= */
+// =====================================================
+// TEST MESSAGE
+// =====================================================
 
-async function callGemini(promptText) {
+function testButton() {
+
+    addMessage(
+        "J.A.R.V.I.S: Button is working.",
+        "ai"
+    );
+
+}
+
+
+// =====================================================
+// GEMINI
+// =====================================================
+
+async function callGemini(text) {
 
     if (!API_KEY) {
-
-        throw new Error(
-            "Gemini API Key not found."
-        );
+        throw new Error("Gemini API Key missing.");
     }
 
-
-    const userText = String(promptText || "").trim();
-
-
-    if (!userText) {
-
-        throw new Error(
-            "Please enter a message."
-        );
-    }
-
-
-    let lastError =
-        new Error("Gemini API request failed.");
-
-
-    /*
-       Try models one by one.
-    */
+    let lastError = null;
 
     for (const model of MODELS) {
 
         try {
 
             console.log(
-                "Trying Gemini model:",
+                "Trying model:",
                 model
             );
-
 
             const url =
                 "https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -179,241 +140,598 @@ async function callGemini(promptText) {
                 encodeURIComponent(API_KEY);
 
 
-            /*
-               Add user message to temporary history
-            */
+            const body = {
 
-            const requestContents = [
-
-                ...conversationHistory,
-
-                {
-                    role: "user",
-
+                systemInstruction: {
                     parts: [
                         {
-                            text: userText
+                            text: SYSTEM_PROMPT
                         }
                     ]
-                }
+                },
 
-            ];
+                contents: [
+                    {
+                        role: "user",
+
+                        parts: [
+                            {
+                                text: text
+                            }
+                        ]
+                    }
+                ]
+
+            };
 
 
             const response = await fetch(
-
                 url,
-
                 {
-
                     method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json"
-
                     },
 
-                    body: JSON.stringify({
-
-                        systemInstruction: {
-
-                            parts: [
-                                {
-                                    text:
-                                        JARVIS_SYSTEM_PROMPT
-                                }
-                            ]
-
-                        },
-
-                        contents:
-                            requestContents
-
-                    })
-
+                    body: JSON.stringify(body)
                 }
-
             );
 
 
-            let data = null;
+            const data = await response.json();
 
 
-            try {
+            if (!response.ok) {
 
-                data = await response.json();
-
-            } catch (jsonError) {
-
-                throw new Error(
-                    "Invalid response from Gemini API."
-                );
-            }
-
-
-            /*
-               API ERROR
-            */
-
-            if (!response.ok || data?.error) {
-
-                const message =
+                lastError = new Error(
                     data?.error?.message ||
-                    "Gemini API Error: " +
-                    response.status;
-
-
-                lastError =
-                    new Error(message);
-
+                    "Gemini API Error"
+                );
 
                 console.error(
-                    "Gemini model failed:",
                     model,
-                    message
+                    lastError.message
                 );
 
-
-                /*
-                   Retry on temporary errors
-                */
-
-                const retryable =
-                    response.status === 408 ||
-                    response.status === 429 ||
-                    response.status === 500 ||
-                    response.status === 502 ||
-                    response.status === 503 ||
-                    response.status === 504 ||
-                    /high demand/i.test(message) ||
-                    /temporar/i.test(message) ||
-                    /quota/i.test(message) ||
-                    /rate limit/i.test(message) ||
-                    /unavailable/i.test(message);
-
-
-                if (retryable) {
-
-                    continue;
-                }
-
-
-                /*
-                   Invalid model/API key etc.
-                   Try next model only when useful.
-                */
-
-                if (
-                    response.status === 400 ||
-                    response.status === 404
-                ) {
-
-                    continue;
-                }
-
-
-                throw lastError;
+                continue;
             }
 
 
-            /*
-               Extract Gemini response
-            */
-
             const reply =
-                data?.candidates?.[0]?.content?.parts
-                    ?.map(part => part?.text || "")
+                data?.candidates?.[0]
+                    ?.content
+                    ?.parts
+                    ?.map(part => part.text || "")
                     .join("")
                     .trim();
 
 
-            if (!reply) {
+            if (reply) {
 
-                /*
-                   Check finish reason
-                */
+                return reply;
 
-                const finishReason =
-                    data?.candidates?.[0]?.finishReason;
+            }
 
 
-                throw new Error(
-                    finishReason
-                        ? "Gemini stopped with: " +
-                          finishReason
-                        : "Gemini returned an empty response."
+            lastError =
+                new Error(
+                    "Empty Gemini response."
                 );
-            }
-
-
-            /*
-               Save conversation
-            */
-
-            conversationHistory.push({
-
-                role: "user",
-
-                parts: [
-                    {
-                        text: userText
-                    }
-                ]
-
-            });
-
-
-            conversationHistory.push({
-
-                role: "model",
-
-                parts: [
-                    {
-                        text: reply
-                    }
-                ]
-
-            });
-
-
-            /*
-               Keep history small
-               Prevent unlimited browser memory
-            */
-
-            if (conversationHistory.length > 20) {
-
-                conversationHistory =
-                    conversationHistory.slice(-20);
-
-            }
-
-
-            console.log(
-                "Gemini response received from:",
-                model
-            );
-
-
-            return reply;
 
         }
-
 
         catch (error) {
 
             lastError = error;
 
-
             console.error(
                 "Gemini error:",
-                model,
                 error
             );
 
+        }
 
-            /*
-               Try next model
-           
+    }
+
+
+    throw (
+        lastError ||
+        new Error("Gemini request failed.")
+    );
+
+}
+
+
+// =====================================================
+// ASK JARVIS
+// =====================================================
+
+async function askJarvis(text) {
+
+    if (!text) {
+        return;
+    }
+
+
+    const thinking =
+        addMessage(
+            "J.A.R.V.I.S: Thinking...",
+            "ai"
+        );
+
+
+    try {
+
+        const reply =
+            await callGemini(text);
+
+
+        if (thinking) {
+
+            thinking.textContent =
+                "J.A.R.V.I.S: " + reply;
+
+        }
+
+
+        speak(reply);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "JARVIS ERROR:",
+            error
+        );
+
+
+        if (thinking) {
+
+            thinking.textContent =
+                "J.A.R.V.I.S: ERROR - " +
+                error.message;
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// SEND
+// =====================================================
+
+function sendMessage() {
+
+    console.log("SEND CLICKED");
+
+
+    if (!input) {
+
+        console.error(
+            "Input element not found"
+        );
+
+        return;
+    }
+
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+
+        return;
+    }
+
+
+    addMessage(
+        "YOU: " + text,
+        "user"
+    );
+
+
+    input.value = "";
+
+
+    askJarvis(text);
+
+}
+
+
+// =====================================================
+// SEND BUTTON
+// =====================================================
+
+if (sendBtn) {
+
+    sendBtn.addEventListener(
+        "click",
+        function () {
+
+            console.log(
+                "SEND BUTTON CLICK"
+            );
+
+            sendMessage();
+
+        }
+    );
+
+}
+else {
+
+    console.error(
+        "SEND BUTTON NOT FOUND"
+    );
+
+}
+
+
+// =====================================================
+// ENTER KEY
+// =====================================================
+
+if (input) {
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// SPEECH RECOGNITION
+// =====================================================
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+let recognition = null;
+
+let listening = false;
+
+
+if (SpeechRecognition) {
+
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "te-IN";
+
+
+    recognition.continuous =
+        false;
+
+
+    recognition.interimResults =
+        false;
+
+
+    recognition.maxAlternatives =
+        1;
+
+
+    recognition.onstart =
+        function () {
+
+            console.log(
+                "MIC STARTED"
+            );
+
+            listening = true;
+
+
+            if (micBtn) {
+
+                micBtn.classList.add(
+                    "listening"
+                );
+
+            }
+
+        };
+
+
+    recognition.onresult =
+        function (event) {
+
+            console.log(
+                "VOICE RESULT"
+            );
+
+
+            const text =
+                event
+                    .results[0][0]
+                    .transcript
+                    .trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            addMessage(
+                "YOU: " + text,
+                "user"
+            );
+
+
+            askJarvis(text);
+
+        };
+
+
+    recognition.onerror =
+        function (event) {
+
+            console.error(
+                "MIC ERROR:",
+                event.error
+            );
+
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
+
+                addMessage(
+                    "J.A.R.V.I.S: Please allow microphone permission.",
+                    "ai"
+                );
+
+            }
+
+        };
+
+
+    recognition.onend =
+        function () {
+
+            console.log(
+                "MIC STOPPED"
+            );
+
+
+            listening = false;
+
+
+            if (micBtn) {
+
+                micBtn.classList.remove(
+                    "listening"
+                );
+
+            }
+
+        };
+
+}
+else {
+
+    console.error(
+        "Speech Recognition NOT supported"
+    );
+
+}
+
+
+// =====================================================
+// MIC BUTTON
+// =====================================================
+
+if (micBtn) {
+
+    micBtn.addEventListener(
+        "click",
+        function () {
+
+            console.log(
+                "MIC BUTTON CLICK"
+            );
+
+
+            if (!recognition) {
+
+                addMessage(
+                    "J.A.R.V.I.S: Voice recognition is not supported in this browser.",
+                    "ai"
+                );
+
+                return;
+            }
+
+
+            if (listening) {
+
+                recognition.stop();
+
+                return;
+
+            }
+
+
+            try {
+
+                speechSynthesis.cancel();
+
+                recognition.start();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "MIC START ERROR:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+else {
+
+    console.error(
+        "MIC BUTTON NOT FOUND"
+    );
+
+}
+
+
+// =====================================================
+// TEXT TO SPEECH
+// =====================================================
+
+let voices = [];
+
+
+function loadVoices() {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
+        return;
+    }
+
+
+    voices =
+        speechSynthesis.getVoices();
+
+}
+
+
+loadVoices();
+
+
+if (
+    "speechSynthesis" in window
+) {
+
+    speechSynthesis.onvoiceschanged =
+        loadVoices;
+
+}
+
+
+function speak(text) {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
+        return;
+    }
+
+
+    if (!text) {
+        return;
+    }
+
+
+    speechSynthesis.cancel();
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+    utterance.lang =
+        "te-IN";
+
+
+    utterance.rate =
+        1;
+
+
+    utterance.pitch =
+        0.9;
+
+
+    utterance.volume =
+        1;
+
+
+    const teluguVoice =
+        voices.find(
+            voice =>
+                voice.lang &&
+                voice.lang
+                    .toLowerCase()
+                    .startsWith("te")
+        );
+
+
+    if (teluguVoice) {
+
+        utterance.voice =
+            teluguVoice;
+
+    }
+
+
+    speechSynthesis.speak(
+        utterance
+    );
+
+}
+
+
+// =====================================================
+// STARTUP
+// =====================================================
+
+console.log(
+    "================================"
+);
+
+console.log(
+    "J.A.R.V.I.S ONLINE"
+);
+
+console.log(
+    "SEND:", !!sendBtn
+);
+
+console.log(
+    "MIC:", !!micBtn
+);
+
+console.log(
+    "VOICE:", !!recognition
+);
+
+console.log(
+    "================================"
+);
