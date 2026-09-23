@@ -1,236 +1,66 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbz-pIVQwKxbFDtOFnUUXVwWcxUU8Iylt6Nni3k6yvqT5TwsrwHoOH8P3xXKC4M-Hu0j/exec";
-
-// HTML Elements
-const chat = document.getElementById("chat");
-const input = document.getElementById("msg");
-const sendButton = document.getElementById("send");
-
-// Speech Recognition
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-let recognition = null;
-let isListening = false;
-
-// ===============================
-// JARVIS TEXT TO SPEECH
-// ===============================
-
-function speak(text) {
-  if (!("speechSynthesis" in window)) {
-    console.log("Speech Synthesis not supported");
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "te-IN";
-  speech.rate = 0.95;
-  speech.pitch = 1;
-  speech.volume = 1;
-
-  window.speechSynthesis.speak(speech);
+// ===== 1. API KEY (Safe: browser లో మాతమ్ర ే) =====
+let API_KEY = localStorage.getItem('jarvis_key');
+if(!API_KEY){
+API_KEY = prompt('Enter your Gemini API Key:');
+if(API_KEY) localStorage.setItem('jarvis_key', API_KEY);
 }
-
-// ===============================
-// CHAT MESSAGE DISPLAY
-// ===============================
-
-function addMessage(message, sender) {
-  const messageElement = document.createElement("div");
-
-  messageElement.className =
-    sender === "user" ? "user-message" : "jarvis-message";
-
-  messageElement.textContent = message;
-
-  chat.appendChild(messageElement);
-  chat.scrollTop = chat.scrollHeight;
+// ===== 2. SMART MODELS (ఒకటిfail అయితేnext auto try) =====
+const MODELS = ["gemini-3.6-flash", "gemini-flash-latest"];
+const chat=document.getElementById('chat');
+const input=document.getElementById('msg');
+const micBtn=document.getElementById('mic-btn');
+// ===== 3. GEMINI BRAIN (auto-fallback) =====
+async function callGemini(p){let lastErr;
+for(const m of MODELS){
+try{
+const res=await fetch(
+"https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent?key="
++API_KEY,
+{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({contents:[{parts:[{text:p}]}]})});
+const data=await res.json();
+if(data.error){
+lastErr=new Error(data.error.message);
+if(/high demand|temporar|quota|rate|unavailable|no longer
+available|deprecated/i.test(data.error.message)) continue;
+throw lastErr;
 }
-
-// ===============================
-// SEND MESSAGE TO BACKEND
-// ===============================
-
-async function sendMessage() {
-  const message = input.value.trim();
-
-  if (!message) {
-    return;
-  }
-
-  addMessage(message, "user");
-
-  input.value = "";
-  input.disabled = true;
-
-  addMessage("ఒక్క క్షణం... ఆలోచిస్తున్నాను.", "jarvis");
-
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify({
-        message: message
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error("Server Error");
-    }
-
-    const data = await response.json();
-
-    // Remove temporary message
-    const messages = chat.querySelectorAll(".jarvis-message");
-    const lastMessage = messages[messages.length - 1];
-
-    if (
-      lastMessage &&
-      lastMessage.textContent === "ఒక్క క్షణం... ఆలోచిస్తున్నాను."
-    ) {
-      lastMessage.remove();
-    }
-
-    const reply =
-      data.reply ||
-      data.response ||
-      data.message ||
-      "క్షమించండి, నాకు సమాధానం అందలేదు.";
-
-    addMessage(reply, "jarvis");
-
-    // Automatically speak reply
-    speak(reply);
-
-  } catch (error) {
-    console.error("Error:", error);
-
-    const messages = chat.querySelectorAll(".jarvis-message");
-    const lastMessage = messages[messages.length - 1];
-
-    if (
-      lastMessage &&
-      lastMessage.textContent === "ఒక్క క్షణం... ఆలోచిస్తున్నాను."
-    ) {
-      lastMessage.remove();
-    }
-
-    const errorMessage =
-      "క్షమించండి. సర్వర్‌తో కనెక్షన్ కాలేదు.";
-
-    addMessage(errorMessage, "jarvis");
-    speak(errorMessage);
-
-  } finally {
-    input.disabled = false;
-    input.focus();
-  }
+return data.candidates[0].content.parts[0].text;
+}catch(e){ lastErr=e; }
 }
-
-// ===============================
-// SEND BUTTON
-// ===============================
-
-if (sendButton) {
-  sendButton.addEventListener("click", sendMessage);
+throw lastErr;
 }
-
-// Enter Key
-if (input) {
-  input.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      sendMessage();
-    }
-  });
+async function askGemini(p){
+add('J.A.R.V.I.S: Thinking...','ai');
+try{
+const reply=await callGemini(p);
+chat.lastChild.innerText='J.A.R.V.I.S: '+reply;
+speak(reply); // reply వచ్చి న వెంటనేVOICE
+}catch(e){
+chat.lastChild.innerText='J.A.R.V.I.S: ERROR - '+e.message;
 }
-
-// ===============================
-// VOICE RECOGNITION
-// ===============================
-
-function startVoiceRecognition() {
-  if (!SpeechRecognition) {
-    alert("మీ Browser Voice Recognition కి Support చేయడం లేదు.");
-    return;
-  }
-
-  if (isListening) {
-    recognition.stop();
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-
-  recognition.lang = "te-IN";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = function () {
-    isListening = true;
-    console.log("JARVIS Listening...");
-  };
-
-  recognition.onresult = function (event) {
-    const spokenText =
-      event.results[0][0].transcript.trim();
-
-    console.log("Voice Text:", spokenText);
-
-    input.value = spokenText;
-
-    // Automatically send voice text to backend
-    sendMessage();
-  };
-
-  recognition.onerror = function (event) {
-    console.error("Voice Error:", event.error);
-
-    if (event.error === "not-allowed") {
-      alert("Microphone Permission ఇవ్వండి.");
-    }
-  };
-
-  recognition.onend = function () {
-    isListening = false;
-    console.log("Voice Recognition Ended");
-  };
-
-  recognition.start();
 }
-
-// ===============================
-// MICROPHONE BUTTON
-// ===============================
-
-let micButton = document.getElementById("mic-button");
-
-if (!micButton) {
-  micButton = document.createElement("button");
-
-  micButton.id = "mic-button";
-  micButton.textContent = "🎤";
-
-  micButton.style.position = "fixed";
-  micButton.style.bottom = "90px";
-  micButton.style.right = "20px";
-  micButton.style.width = "55px";
-  micButton.style.height = "55px";
-  micButton.style.borderRadius = "50%";
-  micButton.style.border = "none";
-  micButton.style.fontSize = "24px";
-  micButton.style.cursor = "pointer";
-  micButton.style.zIndex = "9999";
-
-  document.body.appendChild(micButton);
+// ===== 4. SPEECH RECOGNITION (వినడం) =====
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const rec=new SR(); rec.lang='en-US'; // Telugu కి'te-IN'
+rec.onresult=(e)=>{const t=e.results[0][0].transcript;add('YOU: '+t,'user');askGemini(t);};
+micBtn.onclick=()=>{rec.start();micBtn.innerText='LISTENING...';};
+rec.onend=()=>{micBtn.innerText='️';};
+// ===== 5. TEXT-TO-SPEECH (మాట్లాడటం) =====
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices(); }
+loadVoices();
+speechSynthesis.onvoiceschanged=loadVoices;
+function speak(t){
+const u=new SpeechSynthesisUtterance(t);u.rate=1.05; u.pitch=0.85;
+const v=voices.find(v=>v.lang.startsWith('en'));
+if(v) u.voice=v;
+speechSynthesis.speak(u);
 }
-
-micButton.addEventListener("click", startVoiceRecognition);
-
-console.log("JARVIS AI Assistant Loaded Successfully");
-        
+// ===== 6. TEXT SEND BUTTON =====
+document.getElementById('send').onclick=()=>{
+const t=input.value.trim(); if(!t)return;
+add('YOU: '+t,'user'); input.value=''; askGemini(t);
+};
+function add(t,w){const d=document.createElement('div');d.className='msg
+'+w;d.innerText=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
